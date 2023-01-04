@@ -1,7 +1,6 @@
 package com.example.authencation.Project.Controller;
 
 import org.bson.Document;
-import org.bson.json.JsonObject;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -57,15 +56,20 @@ public class ClientController {
 
     //Login API
     @RequestMapping("/clientLogin/{emailId}/{password}")
-    public String ClientLogin(@PathVariable String emailId, @PathVariable String password) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("emailId").is(emailId).and("password").is(password));
-        String result = mt.findOne(query, String.class, "customerDetails");
-        if (result != null) {
-            JsonObject response = new JsonObject(result);
-            System.out.println(response.getJson());
-            return "Login Successfully";
-        }
+    public String ClientLogin(@RequestBody String loginInfo) {
+
+        JSONObject login=new JSONObject();
+        System.out.println(login);
+
+
+//        Query query = new Query();
+//        query.addCriteria(Criteria.where("emailId").is(emailId).and("password").is(password));
+//        String result = mt.findOne(query, String.class, "customerDetails");
+//        if (result != null) {
+//            JsonObject response = new JsonObject(result);
+//            System.out.println(response.getJson());
+//            return "Login Successfully";
+//        }
         return "Login Failed";
     }
 
