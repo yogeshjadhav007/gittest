@@ -8,8 +8,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @CrossOrigin
@@ -27,91 +27,80 @@ public class ClientController {
     @Autowired
     OtpGenerator otpGenerator;
 
+    @Autowired
+    ResponseUtility responseUtility;
 
-    @PostMapping("/register")
+
+    @PostMapping("/signUp")
     public String CreateClient(@RequestBody String client) {
 
-        JSONObject clientInfo = new JSONObject(client);
-        JSONObject registerResJson = new JSONObject();
-
-        Query query = new Query();
-        query.addCriteria(Criteria.where("mobileNo").is(clientInfo.getString("contactNo")));
-        String result = mt.findOne(query, String.class, "customerDetails");
-        JSONObject mobileNoResponse = new JSONObject(result);
+        JSONObject clientDetails = new JSONObject(client);
+        Query query1 = new Query();
+        query1.addCriteria(Criteria.where("mobileNo").is(clientDetails.getString("mobileNo")));
+        clientDetails.remove("mobileNo");
+        String signUpRes = mt.findOne(query1, String.class, "customerDetails");
+        JSONObject mobileNoResponse = new JSONObject(signUpRes);
 
         if (mobileNoResponse.getBoolean("isOtpVerified")) {
             Update update = new Update();
-            update.set("signUpData", Document.parse(clientInfo.toString()));
-            mt.findAndModify(query, update, options, String.class, "customerDetails");
+            update.set("signUpData", Document.parse(clientDetails.toString()));
+            mt.findAndModify(query1, update, options, String.class, "customerDetails");
         } else {
-            registerResJson.put("status", "error");
-            registerResJson.put("message", "Mobile no not verified");
-            return registerResJson.toString();
+            return responseUtility.errorResponse("Mobile no not verified");
         }
-        registerResJson.put("status", "success");
-        registerResJson.put("message", "Registration Successfully");
-        return registerResJson.toString();
+        return responseUtility.successResponse("Registration Successfully");
     }
 
 
-    //Login API
-    @RequestMapping("/clientLogin/{emailId}/{password}")
-    public String ClientLogin(@RequestBody String loginInfo) {
+    @PostMapping("/login")
+    public String ClientLogin(@RequestBody String login) {
 
-        JSONObject login=new JSONObject();
-        System.out.println(login);
+        JSONObject loginDetails = new JSONObject(login);
+        Query query =new Query();
+        query.addCriteria(Criteria.where("mobileNo").is(loginDetails.getString("mobileNo")));
+        String loginRes = mt.findOne(query, String.class, "customerDetails");
+        JSONObject loginJSON = new JSONObject(loginRes).getJSONObject("signUpData");
 
-
-//        Query query = new Query();
-//        query.addCriteria(Criteria.where("emailId").is(emailId).and("password").is(password));
-//        String result = mt.findOne(query, String.class, "customerDetails");
-//        if (result != null) {
-//            JsonObject response = new JsonObject(result);
-//            System.out.println(response.getJson());
-//            return "Login Successfully";
-//        }
-        return "Login Failed";
+        if (loginJSON.getString("emailId").equals(loginDetails.getString("emailId")) &&
+                loginJSON.getString("password").equals(loginDetails.getString("password"))) {
+            return responseUtility.successResponse("Login Successfully");
+        }
+        return responseUtility.errorResponse("Login Failed");
     }
 
 
-
-    @PostMapping("/generateOtp")
-    public ResponseEntity<String> addToCache(@RequestBody String key) {
+    @PostMapping("/generate-Otp")
+    public String addToCache(@RequestBody String key) {
 
         int value = otpGenerator.generateOtp();
         JSONObject object = new JSONObject(key);
-        cacheRepository.put(object.getString("contactNo"), value);
-        return ResponseEntity.ok("Otp Generated Successfully : " + value);
+        cacheRepository.put(object.getString("mobileNo"), value);
+        return responseUtility.successResponse("Otp Generated Successfully :".concat(String.valueOf(value)));
     }
 
 
-    @PostMapping("/verifyOtp")
-    public ResponseEntity<String> addToCache(@RequestBody VerifyOTP key) {
+    @PostMapping("/verify-Otp")
+    public String addToCache(@RequestBody VerifyOTP key) {
         JSONObject verifyOtpReqJson = new JSONObject(key);
 
-        if (cacheRepository.get(key.getContactNo()).isPresent() && cacheRepository.get(key.getContactNo()).get().equals(key.getOtp())) {
+        if (cacheRepository.get(key.getMobileNo()).isPresent() && cacheRepository.get(key.getMobileNo()).get().equals(key.getOtp())) {
             verifyOtpReqJson.put("isOtpVerified", true);
             verifyOtpReqJson.remove("otp");
-
-            Query query = new Query();
+            Query query=new Query();
             query.addCriteria(Criteria.where("mobileNo").is(verifyOtpReqJson.getString("mobileNo")));
             System.out.println(query);
-            String result = mt.findOne(query, String.class, "customerDetails");
-            System.out.println(result);
-            if (result != null) {
+            String verifyOptRes = mt.findOne(query, String.class, "customerDetails");
+            System.out.println(verifyOptRes);
+            if (verifyOptRes != null) {
                 Update update = new Update();
                 update.set("verifyMobileNo", Document.parse(verifyOtpReqJson.toString()));
                 mt.findAndModify(query, update, options, String.class, "customerDetails");
-
-                return ResponseEntity.ok("OTP verified Successfully");
-
-            } else if (result == null){
-
+                return responseUtility.successResponse("OTP verified Successfully");
+            } else if (verifyOptRes == null) {
                 mt.insert(Document.parse(verifyOtpReqJson.toString()), "customerDetails");
-                return ResponseEntity.ok("OTP verified Successfully");
-
+                return responseUtility.successResponse("OTP verified Successfully");
             }
         }
-        return ResponseEntity.ok("Invalid OTP!");
+        return responseUtility.errorResponse("Invalid OTP!");
     }
 }

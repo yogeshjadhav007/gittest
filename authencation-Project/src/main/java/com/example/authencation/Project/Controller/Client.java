@@ -15,7 +15,7 @@ public class Client {
     @Id
     private Integer id;
     private String name;
-    private String emailid;
+    private String emailId;
     private String password;
     private String contactNo;
 }

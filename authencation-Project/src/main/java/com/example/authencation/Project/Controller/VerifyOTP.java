@@ -7,7 +7,7 @@ import java.io.Serializable;
 public class VerifyOTP implements Serializable {
 
 
-    public String contactNo;
+    public String mobileNo;
     public String otp;
 
 }
