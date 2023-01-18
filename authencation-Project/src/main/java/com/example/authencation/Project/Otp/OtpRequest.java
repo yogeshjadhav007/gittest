@@ -1,4 +1,4 @@
-package com.example.authencation.Project.Controller;
+package com.example.authencation.Project.Otp;
 
 import lombok.Getter;
 

@@ -1,4 +1,4 @@
-package com.example.authencation.Project.Controller;
+package com.example.authencation.Project.Redis;
 
 import io.lettuce.core.ClientOptions;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,5 +60,4 @@ public class RedisConfigurationBean {
         template.setConnectionFactory(redisConnectionFactory);
         return template;
     }
-
 }

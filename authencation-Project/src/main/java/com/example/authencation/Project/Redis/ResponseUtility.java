@@ -1,4 +1,4 @@
-package com.example.authencation.Project.Controller;
+package com.example.authencation.Project.Redis;
 
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;

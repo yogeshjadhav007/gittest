@@ -1,5 +1,8 @@
 package com.example.authencation.Project.Controller;
 
+import com.example.authencation.Project.Otp.OtpGenerator;
+import com.example.authencation.Project.Otp.VerifyOTP;
+import com.example.authencation.Project.Redis.ResponseUtility;
 import org.bson.Document;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,16 +11,17 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin
 public class ClientController {
-
     @Autowired
     MongoTemplate mt;
-
+    // used to perform DB operations without using any repository interface.
     public static final FindAndModifyOptions options = FindAndModifyOptions.options().upsert(true).returnNew(true);
     public static final FindAndModifyOptions modifyOptions = FindAndModifyOptions.options().returnNew(true);
 
@@ -30,8 +34,7 @@ public class ClientController {
     @Autowired
     ResponseUtility responseUtility;
 
-
-    @PostMapping("/signUp")
+    @PostMapping("/register")
     public String CreateClient(@RequestBody String client) {
 
         JSONObject clientDetails = new JSONObject(client);
@@ -51,7 +54,6 @@ public class ClientController {
         return responseUtility.successResponse("Registration Successfully");
     }
 
-
     @PostMapping("/login")
     public String ClientLogin(@RequestBody String login) {
 
@@ -68,8 +70,7 @@ public class ClientController {
         return responseUtility.errorResponse("Login Failed");
     }
 
-
-    @PostMapping("/generate-Otp")
+    @PostMapping("/generateOtp")
     public String addToCache(@RequestBody String key) {
 
         int value = otpGenerator.generateOtp();
@@ -78,8 +79,7 @@ public class ClientController {
         return responseUtility.successResponse("Otp Generated Successfully :".concat(String.valueOf(value)));
     }
 
-
-    @PostMapping("/verify-Otp")
+    @PostMapping("/verifyOtp")
     public String addToCache(@RequestBody VerifyOTP key) {
         JSONObject verifyOtpReqJson = new JSONObject(key);
 

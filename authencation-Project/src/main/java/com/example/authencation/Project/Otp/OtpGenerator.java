@@ -1,4 +1,4 @@
-package com.example.authencation.Project.Controller;
+package com.example.authencation.Project.Otp;
 
 import org.springframework.stereotype.Component;
 
@@ -14,6 +14,7 @@ public class OtpGenerator {
     private static final int UPPER_BOUND = 900000;
 
     public int generateOtp() {
+
         try {
             Random random = SecureRandom.getInstance(DEFAULT_ALGORITHM);
             return LOWER_BOUND + random.nextInt(UPPER_BOUND);

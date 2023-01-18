@@ -1,5 +1,8 @@
-package com.example.authencation.Project.Controller;
 
+package com.example.authencation.Project.Otp;
+
+
+import com.example.authencation.Project.Controller.CacheRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -17,8 +20,7 @@ public class OTPCacheRepository implements CacheRepository {
     private ValueOperations<String, String> valueOps;
 
     @Autowired
-    public OTPCacheRepository(StringRedisTemplate redisTemplate,
-                              @Value("${spring.redis.timeToLive}") long ttl) {
+    public OTPCacheRepository(StringRedisTemplate redisTemplate, @Value("${spring.redis.timeToLive}") long ttl) {
         this.redisTemplate = redisTemplate;
         valueOps = redisTemplate.opsForValue();
         this.ttl = ttl;
